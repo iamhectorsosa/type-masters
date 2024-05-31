@@ -87,6 +87,7 @@ export const Phrase: FC<{
         ref={inputRef}
         className="pointer-events-none absolute top-[-9999px] opacity-0"
         onKeyDown={handleValueInputKeyDown}
+        onPaste={(e) => e.preventDefault()}
       />
     </label>
   )
