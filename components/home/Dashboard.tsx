@@ -1,6 +1,7 @@
 "use client"
 
 import React, { FC } from "react"
+import { CircleIcon } from "@radix-ui/react-icons"
 import { useQuery } from "@tanstack/react-query"
 import * as z from "zod"
 
@@ -68,7 +69,13 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
     }
   }, [profile.data, supabase])
 
-  if (!profile.data || "error" in profile.data) return null
+  if (!profile.data || "error" in profile.data) {
+    return (
+      <div className="mx-auto flex min-h-[50vh] w-full max-w-lg items-center justify-center py-12">
+        <CircleIcon className="size-12 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-lg items-center justify-center py-12">
