@@ -24,16 +24,7 @@ const onlineUserSchema = z.array(
 
 export type OnlineUsers = z.infer<typeof onlineUserSchema>
 
-const pointsSchema = z.object({
-  event: z.string(),
-  payload: z.object({
-    points: z.number(),
-  }),
-  type: z.string(),
-})
-
-const LOBBY_ROOM = "lobby-room"
-const GAME_ROOM = "game-room"
+const HOME_ROOM = "home-room"
 
 export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
   const profile = useQuery({
@@ -46,13 +37,12 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
   })
 
   const [users, setUsers] = React.useState<OnlineUsers>([])
-
-  const [points, setPoints] = React.useState(0)
+  const [selectedPlayers, setSelectedPlayers] = React.useState<OnlineUsers>([])
 
   const supabase = createClient()
 
   React.useEffect(() => {
-    const room = supabase.channel(LOBBY_ROOM)
+    const room = supabase.channel(HOME_ROOM)
 
     room
       .on("presence", { event: "sync" }, () => {
@@ -63,7 +53,19 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           setUsers(users.data)
         }
       })
-
+      .on("presence", { event: "leave" }, ({ leftPresences }) => {
+        const leftPlayers = onlineUserSchema.safeParse(leftPresences)
+        if (leftPlayers.success) {
+          setSelectedPlayers((selectedPlayers) =>
+            selectedPlayers.filter(
+              (player) =>
+                !leftPlayers.data
+                  .map((p) => p.username)
+                  .includes(player.username)
+            )
+          )
+        }
+      })
       .subscribe((status) => {
         if (status !== "SUBSCRIBED") {
           return
@@ -82,38 +84,6 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
       void supabase.removeChannel(room)
     }
   }, [profile.data, supabase])
-
-  React.useEffect(() => {
-    const gameRoom = supabase.channel(GAME_ROOM)
-
-    gameRoom.on("broadcast", { event: "game" }, (payload) => {
-      const points = pointsSchema.safeParse(payload)
-      if (points.success) {
-        setPoints(points.data.payload.points)
-      }
-    })
-
-    gameRoom.subscribe()
-    return () => {
-      void supabase.removeChannel(gameRoom)
-    }
-  }, [profile.data, supabase, points])
-
-  const sendPoint = React.useCallback(
-    (points: number) => {
-      const gameRoom = supabase.channel(GAME_ROOM)
-      if (!profile.data || "error" in profile.data) return null
-
-      gameRoom
-        .send({
-          type: "broadcast",
-          event: "game",
-          payload: { points },
-        })
-        .catch(() => {})
-    },
-    [profile.data, supabase]
-  )
 
   if (!profile.data || "error" in profile.data) {
     return (
@@ -136,10 +106,26 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           averageWpm={120}
           acurracyPercentage={2}
         />
-        <OnlinePlayers players={users} />
-        <Button onClick={() => sendPoint(points + 1)}>
-          Click me, points: {points}
-        </Button>
+        <OnlinePlayers
+          players={users}
+          selectedPlayers={selectedPlayers}
+          setSelectedPlayers={setSelectedPlayers}
+        />
+        <div className="flex gap-x-2">
+          <Button
+            disabled={selectedPlayers.length === 0}
+            onClick={() => console.log({ selectedPlayers })}
+          >
+            Send invite
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={selectedPlayers.length === 0}
+            onClick={() => setSelectedPlayers([])}
+          >
+            Clear all
+          </Button>
+        </div>
         <div className="flex w-full justify-center">
           <Button
             onClick={() =>
