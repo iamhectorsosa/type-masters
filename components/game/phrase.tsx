@@ -12,8 +12,9 @@ import {
   buildRenderedPhrase,
   calculatePercentageCompleted,
   Char,
-  splitPhrase,
 } from "@/utils/game"
+
+import { cn } from "@/lib/utils"
 
 const getCharColorClassName = ({
   correct,
@@ -32,6 +33,7 @@ export const Phrase: FC<{
   onValueChange: (percentage: number) => void
 }> = ({ phrase, onValueChange }) => {
   const [value, setValue] = useState("")
+  const [inputFocused, setInputFocused] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -55,40 +57,49 @@ export const Phrase: FC<{
   const renderedPhrase = buildRenderedPhrase(phrase, value)
 
   return (
-    <label
-      className="relative block h-screen max-w-full cursor-pointer"
-      htmlFor="phrase"
-    >
-      <h1 className="text-xl">
-        {calculatePercentageCompleted(renderedPhrase)}%
-      </h1>
-      <div className="flex flex-wrap text-3xl">
-        {renderedPhrase.map((word, i) => (
-          <span key={`word-${i}`} className="mx-2">
-            {word.map((char, j) => {
-              return (
-                <>
-                  <span
-                    key={`char-${j}`}
-                    className={getCharColorClassName(char)}
-                  >
-                    {char.value}
-                  </span>
-                </>
-              )
-            })}
-          </span>
-        ))}
-      </div>
-      <input
-        id="phrase"
-        value={value}
-        onChange={handleValueChange}
-        ref={inputRef}
-        className="pointer-events-none absolute top-[-9999px] opacity-0"
-        onKeyDown={handleValueInputKeyDown}
-        onPaste={(e) => e.preventDefault()}
-      />
-    </label>
+    <div className="relative">
+      {!inputFocused && (
+        <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          Click here to focus the input!
+        </h1>
+      )}
+      <label
+        className={cn(
+          "relative block max-w-full cursor-pointer select-none",
+          !inputFocused && "blur-lg"
+        )}
+        htmlFor="phrase"
+      >
+        <div className="flex flex-wrap text-3xl">
+          {renderedPhrase.map((word, i) => (
+            <span key={`word-${i}`} className="mx-2">
+              {word.map((char, j) => {
+                return (
+                  <>
+                    <span
+                      key={`char-${j}`}
+                      className={getCharColorClassName(char)}
+                    >
+                      {char.value}
+                    </span>
+                  </>
+                )
+              })}
+            </span>
+          ))}
+        </div>
+        <input
+          id="phrase"
+          value={value}
+          onChange={handleValueChange}
+          ref={inputRef}
+          className="pointer-events-none absolute top-[-9999px] opacity-0"
+          onKeyDown={handleValueInputKeyDown}
+          onPaste={(e) => e.preventDefault()}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
+        />
+      </label>
+    </div>
   )
 }

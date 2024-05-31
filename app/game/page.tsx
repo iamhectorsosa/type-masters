@@ -9,8 +9,7 @@ export default function Page() {
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
 
   return (
-    <div>
-      Game
+    <div className="space-y-6">
       <Race
         players={[
           { username: "Player 1", percentage: playerPercentage, hue: "31" },

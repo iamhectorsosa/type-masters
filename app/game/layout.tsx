@@ -1,3 +1,3 @@
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <main className="px-6">{children}</main>
+  return <main className="m-auto max-w-7xl px-6 py-12">{children}</main>
 }
