@@ -25,6 +25,7 @@ const onlineUserSchema = z.array(
 export type OnlineUsers = z.infer<typeof onlineUserSchema>
 
 const LOBBY_ROOM = "lobby-room"
+const GAME_ROOM = "game-room"
 
 export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
   const profile = useQuery({
@@ -37,6 +38,8 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
   })
 
   const [users, setUsers] = React.useState<OnlineUsers>([])
+
+  const [points, setPoints] = React.useState(0)
 
   const supabase = createClient()
 
@@ -52,8 +55,8 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           setUsers(users.data)
         }
       })
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      .subscribe(async (status) => {
+
+      .subscribe((status) => {
         if (status !== "SUBSCRIBED") {
           return
         }
@@ -64,13 +67,40 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           username: profile.data.username,
           preferredHue: profile.data.preferred_hue,
         }
-        await room.track(user)
+        room.track(user).catch(() => {})
       })
 
     return () => {
       void supabase.removeChannel(room)
     }
   }, [profile.data, supabase])
+
+  React.useEffect(() => {
+    const gameRoom = supabase.channel(GAME_ROOM)
+
+    gameRoom.on("broadcast", { event: "game" }, (payload) => {
+      console.log(payload)
+    })
+
+    gameRoom
+      .send({
+        type: "broadcast",
+        event: "game",
+        payload: { points },
+      })
+      .catch(() => {})
+
+    gameRoom.subscribe((status) => {
+      if (status !== "SUBSCRIBED") {
+        return
+      }
+
+      if (!profile.data || "error" in profile.data) return null
+    })
+    return () => {
+      void supabase.removeChannel(gameRoom)
+    }
+  }, [profile.data, supabase, points])
 
   if (!profile.data || "error" in profile.data) {
     return (
@@ -94,6 +124,9 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           acurracyPercentage={2}
         />
         <OnlinePlayers players={users} />
+        <Button onClick={() => setPoints((p) => p + 1)}>
+          Click me, points: {points}
+        </Button>
         <div className="flex w-full justify-center">
           <Button
             onClick={() =>
