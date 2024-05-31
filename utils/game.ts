@@ -3,16 +3,16 @@ export const splitPhrase = (phrase: string) => {
   return words.map((word) => word.split(""))
 }
 
-type Char = {
+export type Char = {
   value: string;
   correct?: boolean;
   exists: boolean;
   additionalIncorrect?: boolean;
 }
 
-type Word = Char[]
+export type Word = Char[]
 
-type BuiltPhrase = Word[]
+export type BuiltPhrase = Word[]
 
 export const buildRenderedPhrase = (phrase: string, value: string): BuiltPhrase => {
   const phraseWords = splitPhrase(phrase);
@@ -39,14 +39,6 @@ export const buildRenderedPhrase = (phrase: string, value: string): BuiltPhrase 
 
     return phraseTokens.concat(additionalTokens ?? [])
   })
-}
-
-export const getCharColorClassName = ({ correct, exists, additionalIncorrect }: Char) => {
-  if (!exists) return ""
-  if (additionalIncorrect) return "text-red-900"
-
-  if (correct) return "text-green-500"
-  return "text-red-500"
 }
 
 export const currentCursorPosition = (builtPhrase: BuiltPhrase): [number, number] => {

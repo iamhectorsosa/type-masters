@@ -11,9 +11,21 @@ import {
 import {
   buildRenderedPhrase,
   calculatePercentageCompleted,
-  getCharColorClassName,
+  Char,
   splitPhrase,
 } from "@/utils/game"
+
+const getCharColorClassName = ({
+  correct,
+  exists,
+  additionalIncorrect,
+}: Char) => {
+  if (!exists) return ""
+  if (additionalIncorrect) return "text-red-900"
+
+  if (correct) return "text-green-500"
+  return "text-red-500"
+}
 
 export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
   const [value, setValue] = useState("")
@@ -36,8 +48,6 @@ export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
 
   const renderedPhrase = buildRenderedPhrase(phrase, value)
 
-  // const cursorPosition = currentCursorPosition(renderedPhrase)
-
   return (
     <label
       className="relative block h-screen max-w-full cursor-pointer"
@@ -52,9 +62,6 @@ export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
             {word.map((char, j) => {
               return (
                 <>
-                  {/* {isCurrentPositionCursor([i, j], cursorPosition) && (
-                    <span className="caret">|</span>
-                  )} */}
                   <span
                     key={`char-${j}`}
                     className={getCharColorClassName(char)}
