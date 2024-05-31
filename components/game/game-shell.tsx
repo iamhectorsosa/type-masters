@@ -1,13 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import { BuiltPhrase, calculateWPM, generateNewPhraseText } from "@/utils/game"
+import { useMutation } from "@tanstack/react-query"
 import confetti from "canvas-confetti"
 
 import { timeFormat } from "@/lib/time"
 import { Phrase } from "@/components/game/phrase"
 import { Race } from "@/components/game/race"
 import { Results } from "@/components/game/results"
+
+import { updateMatch } from "@/modules/matches/match"
 
 import { useAccuracy } from "./hooks/useAccuracy"
 import { useTimer } from "./hooks/useTimer"
@@ -19,13 +22,20 @@ const MOCK_PLAYERS = [
   { username: "Player 5", percentage: 90, hue: "21" },
 ]
 
-export default function Page() {
+export const GameShell: FC<{ matchId: string; userId: string }> = ({
+  matchId,
+  userId,
+}) => {
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
   const [phrase] = useState(generateNewPhraseText(20))
   const { time, startTimer, stopTimer } = useTimer()
 
   const accuracyHelpers = useAccuracy()
   const [accuracy, setAccuracy] = useState<number | null>(null)
+
+  const updateUserMatch = useMutation({
+    mutationFn: updateMatch,
+  })
 
   useEffect(() => {
     // Recieved start signal from supabase realtime
@@ -40,6 +50,12 @@ export default function Page() {
       origin: { y: 0.6 },
     })
     setAccuracy(accuracyHelpers.retrieveAccuracy())
+
+    updateUserMatch.mutate({
+      match_id: matchId,
+      user_id: userId,
+      wpm: calculateWPM(time, phrase),
+    })
   }
 
   const handlePhraseValueChange = (

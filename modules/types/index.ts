@@ -145,16 +145,19 @@ export type Database = {
           created_at: string
           match_id: string
           user_id: string
+          wpm: number
         }
         Insert: {
           created_at?: string
           match_id: string
           user_id: string
+          wpm?: number
         }
         Update: {
           created_at?: string
           match_id?: string
           user_id?: string
+          wpm?: number
         }
         Relationships: [
           {
