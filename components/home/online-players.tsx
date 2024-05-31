@@ -1,7 +1,6 @@
 import * as React from "react"
 
-import { AvatarPlaceholder } from "@/components/home/avatar-placeholder"
-
+import { AvatarPlaceholder } from "./avatar-placeholder"
 import { OnlineUsers } from "./dashboard"
 
 export const OnlinePlayers: React.FC<{ players: OnlineUsers }> = ({
