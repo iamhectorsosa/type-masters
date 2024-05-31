@@ -24,6 +24,14 @@ const onlineUserSchema = z.array(
 
 export type OnlineUsers = z.infer<typeof onlineUserSchema>
 
+const pointsSchema = z.object({
+  event: z.string(),
+  payload: z.object({
+    points: z.number(),
+  }),
+  type: z.string(),
+})
+
 const LOBBY_ROOM = "lobby-room"
 const GAME_ROOM = "game-room"
 
@@ -79,28 +87,33 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
     const gameRoom = supabase.channel(GAME_ROOM)
 
     gameRoom.on("broadcast", { event: "game" }, (payload) => {
-      console.log(payload)
-    })
-
-    gameRoom
-      .send({
-        type: "broadcast",
-        event: "game",
-        payload: { points },
-      })
-      .catch(() => {})
-
-    gameRoom.subscribe((status) => {
-      if (status !== "SUBSCRIBED") {
-        return
+      const points = pointsSchema.safeParse(payload)
+      if (points.success) {
+        setPoints(points.data.payload.points)
       }
-
-      if (!profile.data || "error" in profile.data) return null
     })
+
+    gameRoom.subscribe()
     return () => {
       void supabase.removeChannel(gameRoom)
     }
   }, [profile.data, supabase, points])
+
+  const sendPoint = React.useCallback(
+    (points: number) => {
+      const gameRoom = supabase.channel(GAME_ROOM)
+      if (!profile.data || "error" in profile.data) return null
+
+      gameRoom
+        .send({
+          type: "broadcast",
+          event: "game",
+          payload: { points },
+        })
+        .catch(() => {})
+    },
+    [profile.data, supabase]
+  )
 
   if (!profile.data || "error" in profile.data) {
     return (
@@ -124,7 +137,7 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           acurracyPercentage={2}
         />
         <OnlinePlayers players={users} />
-        <Button onClick={() => setPoints((p) => p + 1)}>
+        <Button onClick={() => sendPoint(points + 1)}>
           Click me, points: {points}
         </Button>
         <div className="flex w-full justify-center">
