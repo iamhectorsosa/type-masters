@@ -53,6 +53,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^5.18.1
     version: 5.40.0(react@18.3.1)
+  canvas-confetti:
+    specifier: ^1.9.3
+    version: 1.9.3
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.0
@@ -100,6 +103,9 @@ devDependencies:
   '@tanstack/eslint-plugin-query':
     specifier: ^5.18.1
     version: 5.35.6(eslint@8.57.0)(typescript@5.4.5)
+  '@types/canvas-confetti':
+    specifier: ^1.6.4
+    version: 1.6.4
   '@types/node':
     specifier: ^20
     version: 20.12.13
@@ -2266,6 +2272,10 @@ packages:
       react: 18.3.1
     dev: false
 
+  /@types/canvas-confetti@1.6.4:
+    resolution: {integrity: sha512-fNyZ/Fdw/Y92X0vv7B+BD6ysHL4xVU5dJcgzgxLdGbn8O3PezZNIJpml44lKM0nsGur+o/6+NZbZeNTt00U1uA==}
+    dev: true
+
   /@types/cookie@0.4.1:
     resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
     dev: true
@@ -2973,6 +2983,10 @@ packages:
 
   /caniuse-lite@1.0.30001625:
     resolution: {integrity: sha512-4KE9N2gcRH+HQhpeiRZXd+1niLB/XNLAhSy4z7fI8EzcbcPoAqjNInxVHTiTwWfTIV4w096XG8OtCOCQQKPv3w==}
+
+  /canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
+    dev: false
 
   /chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}

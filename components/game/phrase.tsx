@@ -31,7 +31,8 @@ const getCharColorClassName = ({
 export const Phrase: FC<{
   phrase: string
   onValueChange: (percentage: number) => void
-}> = ({ phrase, onValueChange }) => {
+  onComplete: () => void
+}> = ({ phrase, onValueChange, onComplete }) => {
   const [value, setValue] = useState("")
   const [inputFocused, setInputFocused] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -43,9 +44,14 @@ export const Phrase: FC<{
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     const builtPhrase = buildRenderedPhrase(phrase, e.target.value)
     const percentage = calculatePercentageCompleted(builtPhrase)
-    if (percentage > 100) return
-    setValue(e.target.value)
-    onValueChange(percentage)
+    if (percentage <= 100) {
+      setValue(e.target.value)
+      onValueChange(percentage)
+    }
+
+    if (percentage === 100) {
+      onComplete()
+    }
   }
 
   const handleValueInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {

@@ -20,7 +20,7 @@ export const PlayerMarker: FC<{ player: Player }> = ({
           background: `linear-gradient(to top right, ${color1} 25%, ${color2})`,
         }}
       ></div>
-      <div className="px-2">{username}</div>
+      <div className="text-nowrap px-2">{username}</div>
     </div>
   )
 }

@@ -20,6 +20,12 @@ export type Player = {
   hue: string;
 }
 
+export type PlayerResults = {
+  player: Player;
+  time?: number;
+  place?: number;
+}
+
 export const buildRenderedPhrase = (phrase: string, value: string): BuiltPhrase => {
   const phraseWords = splitPhrase(phrase);
   const valueWords = splitPhrase(value);
