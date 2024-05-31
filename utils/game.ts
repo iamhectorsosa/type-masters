@@ -14,6 +14,12 @@ export type Word = Char[]
 
 export type BuiltPhrase = Word[]
 
+export type Player = {
+  percentage: number;
+  username: string;
+  hue: string;
+}
+
 export const buildRenderedPhrase = (phrase: string, value: string): BuiltPhrase => {
   const phraseWords = splitPhrase(phrase);
   const valueWords = splitPhrase(value);

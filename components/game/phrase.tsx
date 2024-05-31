@@ -27,7 +27,10 @@ const getCharColorClassName = ({
   return "text-red-500"
 }
 
-export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
+export const Phrase: FC<{
+  phrase: string
+  onValueChange: (percentage: number) => void
+}> = ({ phrase, onValueChange }) => {
   const [value, setValue] = useState("")
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -36,8 +39,11 @@ export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
   }, [])
 
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (splitPhrase(value).length > splitPhrase(phrase).length) return
+    const builtPhrase = buildRenderedPhrase(phrase, e.target.value)
+    const percentage = calculatePercentageCompleted(builtPhrase)
+    if (percentage > 100) return
     setValue(e.target.value)
+    onValueChange(percentage)
   }
 
   const handleValueInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -81,6 +87,7 @@ export const Phrase: FC<{ phrase: string }> = ({ phrase }) => {
         ref={inputRef}
         className="pointer-events-none absolute top-[-9999px] opacity-0"
         onKeyDown={handleValueInputKeyDown}
+        onPaste={(e) => e.preventDefault()}
       />
     </label>
   )
