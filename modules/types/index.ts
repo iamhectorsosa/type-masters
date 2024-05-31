@@ -37,20 +37,30 @@ export type Database = {
       matches: {
         Row: {
           created_at: string
+          creator_id: string | null
           id: string
           winner_id: string | null
         }
         Insert: {
           created_at?: string
+          creator_id?: string | null
           id?: string
           winner_id?: string | null
         }
         Update: {
           created_at?: string
+          creator_id?: string | null
           id?: string
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matches_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matches_winner_id_fkey"
             columns: ["winner_id"]
