@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
 
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -20,15 +19,8 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
   )
   return (
     <QueryClientProvider client={queryClient}>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
-      </NextThemesProvider>
+      <TooltipProvider>{children}</TooltipProvider>
+      <Toaster />
     </QueryClientProvider>
   )
 }
