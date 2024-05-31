@@ -11,12 +11,8 @@ export default async function Page() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!user || !user.email) {
     redirect("/login")
-  }
-
-  if (user.is_anonymous || !user.email) {
-    redirect("/settings")
   }
 
   return <CredentialsForm userEmail={user.email} />

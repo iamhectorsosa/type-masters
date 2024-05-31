@@ -28,17 +28,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-import { signInAnonymously, signInWithEmailPassword } from "@/modules/user/auth"
+import { signInWithEmailPassword } from "@/modules/user/auth"
 
 export const LoginForm: React.FC<{
   error?: { message: string; status: number }
 }> = ({ error }) => {
   const signIn = useMutation({
     mutationFn: signInWithEmailPassword,
-  })
-
-  const anonymousSignIn = useMutation({
-    mutationFn: signInAnonymously,
   })
 
   function handleSignIn({
@@ -57,26 +53,12 @@ export const LoginForm: React.FC<{
     })
   }
 
-  function handleAnonymousSignIn(): void {
-    anonymousSignIn.mutate({
-      redirect: {
-        url: "/settings",
-      },
-    })
-  }
-
   return (
     <LoginFormComponent
       signIn={handleSignIn}
-      anonymousSignIn={handleAnonymousSignIn}
       isPending={signIn.isPending}
-      isPendingSecondary={anonymousSignIn.isPending}
-      isError={!!signIn.data?.error || !!anonymousSignIn.data?.error || !!error}
-      errorMessage={
-        signIn.data?.error.message ||
-        anonymousSignIn.data?.error.message ||
-        error?.message
-      }
+      isError={!!signIn.data?.error || !!error}
+      errorMessage={signIn.data?.error.message || error?.message}
     />
   )
 }
@@ -88,19 +70,10 @@ const FormSchema = z.object({
 
 const LoginFormComponent: React.FC<{
   signIn: ({ email, password }: { email: string; password: string }) => void
-  anonymousSignIn: () => void
   isPending: boolean
-  isPendingSecondary: boolean
   isError: boolean
   errorMessage?: string
-}> = ({
-  signIn,
-  anonymousSignIn,
-  isPending,
-  isPendingSecondary,
-  isError,
-  errorMessage,
-}) => {
+}> = ({ signIn, isPending, isError, errorMessage }) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -181,17 +154,6 @@ const LoginFormComponent: React.FC<{
                   <CircleIcon className="mr-2 size-4 animate-spin" />
                 )}
                 Sign in
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={anonymousSignIn}
-                disabled={isPendingSecondary}
-              >
-                {isPendingSecondary && (
-                  <CircleIcon className="mr-2 size-4 animate-spin" />
-                )}
-                Continue as guest
               </Button>
               <Button asChild variant="link">
                 <Link href="/login/new">Create new account</Link>

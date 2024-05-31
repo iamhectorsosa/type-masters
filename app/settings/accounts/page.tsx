@@ -15,9 +15,5 @@ export default async function Page() {
     redirect("/login")
   }
 
-  if (user.is_anonymous) {
-    redirect("/settings")
-  }
-
   return <Accounts userId={user.id} />
 }

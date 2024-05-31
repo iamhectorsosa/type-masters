@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button"
 
 export const DynamicNavigationLinks: React.FC<{
   items: { href: string; label: string }[]
-  isAnonymousUser?: boolean
-}> = ({ items, isAnonymousUser }) => {
+}> = ({ items }) => {
   const pathname = usePathname()
 
   return (
@@ -18,8 +17,6 @@ export const DynamicNavigationLinks: React.FC<{
         <Button
           key={href}
           className="lg:w-full lg:justify-start"
-          asChild={!isAnonymousUser}
-          disabled={isAnonymousUser}
           variant="ghost"
         >
           {href === pathname ? (
