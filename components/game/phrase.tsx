@@ -10,6 +10,7 @@ import {
 } from "react"
 import {
   buildRenderedPhrase,
+  BuiltPhrase,
   calculatePercentageCompleted,
   Char,
 } from "@/utils/game"
@@ -30,7 +31,7 @@ const getCharColorClassName = ({
 
 export const Phrase: FC<{
   phrase: string
-  onValueChange: (percentage: number) => void
+  onValueChange: (percentage: number, builtPhrase: BuiltPhrase) => void
   onComplete: () => void
 }> = ({ phrase, onValueChange, onComplete }) => {
   const [value, setValue] = useState("")
@@ -46,7 +47,7 @@ export const Phrase: FC<{
     const percentage = calculatePercentageCompleted(builtPhrase)
     if (percentage <= 100) {
       setValue(e.target.value)
-      onValueChange(percentage)
+      onValueChange(percentage, builtPhrase)
     }
 
     if (percentage === 100) {

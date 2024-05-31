@@ -12,17 +12,19 @@ export const Results: FC<{ players: PlayerResults[] }> = ({ players }) => {
   )
 
   return (
-    <ol className="mx-auto w-96 list-none space-y-2">
-      {sortedPlayers.map(({ player, place, time }, i) => {
+    <ol className="mx-auto list-none space-y-2">
+      {sortedPlayers.map(({ player, place, time, accuracy, wpm }, i) => {
         return (
           <li key={i} className="text-lg">
             <div className="flex w-full justify-between gap-4">
               <div className="">{place ? `${place}.` : "-"}</div>
               <div className="grow border-b-2 border-dotted border-gray-700"></div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <AvatarPlaceholder preferredHue={player.hue} />
-                <span>{`${player.username}`}</span>
-                {time && <span>{` (${timeFormat(time)})`}</span>}
+                <span className="font-bold">{`${player.username}`}</span>
+                {time && <span>{`time: ${timeFormat(time)}`}</span>}
+                {accuracy && <span>{`accuracy: ${accuracy}%`}</span>}
+                {wpm && <span>{`wpm: ${wpm}`}</span>}
               </div>
             </div>
           </li>
