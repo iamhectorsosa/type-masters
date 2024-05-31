@@ -34,64 +34,31 @@ export type Database = {
   }
   public: {
     Tables: {
-      bookmarks: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string
-          id: string
-          image_url: string | null
-          tags: string[] | null
-          title: string
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description: string
-          id?: string
-          image_url?: string | null
-          tags?: string[] | null
-          title: string
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          tags?: string[] | null
-          title?: string
-          updated_at?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookmarks_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       matches: {
         Row: {
           created_at: string
           id: string
+          winner_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
+          winner_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          winner_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -166,21 +133,18 @@ export type Database = {
       user_matches: {
         Row: {
           created_at: string
-          id: number
-          match_id: string | null
-          user_id: string | null
+          match_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
-          match_id?: string | null
-          user_id?: string | null
+          match_id: string
+          user_id: string
         }
         Update: {
           created_at?: string
-          id?: number
-          match_id?: string | null
-          user_id?: string | null
+          match_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -601,4 +565,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
-
