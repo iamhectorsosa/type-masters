@@ -1,6 +1,6 @@
 "use client"
 
-import { FC } from "react"
+import React, { FC } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { createClient } from "@/modules/utils/client"
@@ -14,21 +14,42 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
     queryFn: () => getProfile({ id: userId }),
   })
 
-  const supabase = createClient()
-  const roomOne = supabase.channel("room_01")
+  React.useEffect(() => {
+    const supabase = createClient()
+    const roomOne = supabase.channel("room_01")
 
-  roomOne
-    .on("presence", { event: "sync" }, () => {
-      const newState = roomOne.presenceState()
-      console.log("sync", newState)
+    roomOne
+      .on("presence", { event: "sync" }, () => {
+        const newState = roomOne.presenceState()
+        console.log("sync", newState)
+      })
+      .on("presence", { event: "join" }, ({ key, newPresences }) => {
+        console.log("join", key, newPresences)
+      })
+      .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
+        console.log("leave", key, leftPresences)
+      })
+      .subscribe()
+  }, [])
+
+  React.useEffect(() => {
+    const supabase = createClient()
+    const roomOne = supabase.channel("room_01")
+
+    roomOne.subscribe(async (status) => {
+      if (status !== "SUBSCRIBED") {
+        return
+      }
+
+      const userStatus = {
+        user: "user-2",
+        online_at: new Date().toISOString(),
+      }
+
+      const presenceTrackStatus = await roomOne.track(userStatus)
+      console.log(presenceTrackStatus)
     })
-    .on("presence", { event: "join" }, ({ key, newPresences }) => {
-      console.log("join", key, newPresences)
-    })
-    .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-      console.log("leave", key, leftPresences)
-    })
-    .subscribe()
+  }, [])
 
   if (!profile.data || "error" in profile.data) return null
 
