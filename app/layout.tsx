@@ -9,8 +9,6 @@ import "./globals.css"
 
 import type { Viewport } from "next"
 
-import Navigation from "./navigation"
-
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -29,9 +27,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <Providers>
-          <Navigation>{children}</Navigation>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
