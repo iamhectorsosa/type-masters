@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { generateNewPhraseText } from "@/utils/game"
 import confetti from "canvas-confetti"
 
 import { timeFormat } from "@/lib/time"
@@ -19,6 +20,7 @@ const MOCK_PLAYERS = [
 
 export default function Page() {
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
+  const [phrase] = useState(generateNewPhraseText(20))
   const { time, startTimer, stopTimer } = useTimer()
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function Page() {
       />
       {playerPercentage < 100 ? (
         <Phrase
-          phrase="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam placerat non libero ac mattis. Nam consectetur maximus purus a dignissim."
+          phrase={phrase}
           onValueChange={setPlayerPercentage}
           onComplete={handleRaceComplete}
         />

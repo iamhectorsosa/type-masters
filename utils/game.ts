@@ -1,3 +1,5 @@
+import englishWords from "./english.json";
+
 export const splitPhrase = (phrase: string) => {
   const words = phrase.split(" ")
   return words.map((word) => word.split(""))
@@ -85,4 +87,33 @@ export const calculatePercentageCompleted = (builtPhrase: BuiltPhrase): number =
   }, 0), 0)
 
   return Math.round((correctChars / totalCharacters) * 100)
+}
+
+export const calculateWPM = (finishTime: number, phrase: string) => {
+  // Count the number of words in the typed text
+  const wordCount = phrase.trim().split(/\s+/).length;
+
+  // Calculate the WPM
+  const wpm = Math.round(wordCount / (finishTime / 60));
+
+  return wpm;
+}
+
+export const generateNewPhraseText = (length = 10): string => {
+  let word = 0;
+  let result = "";
+
+  while (word < length) {
+    const randomIndex = Math.floor(Math.random() * englishWords.length);
+    const randomWord = englishWords[randomIndex];
+    result += randomWord;
+
+    if (word !== length - 1) {
+      result += " ";
+    }
+
+    word += 1;
+  }
+
+  return result;
 }
