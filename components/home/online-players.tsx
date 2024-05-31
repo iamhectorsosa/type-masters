@@ -2,13 +2,9 @@ import * as React from "react"
 
 import { AvatarPlaceholder } from "@/components/home/avatar-placeholder"
 
-type OnlineUser = {
-  username: string
-  preferredHue: string
-  presence_ref?: string
-}
+import { OnlineUsers } from "./dashboard"
 
-export const OnlinePlayers: React.FC<{ players: OnlineUser[] }> = ({
+export const OnlinePlayers: React.FC<{ players: OnlineUsers }> = ({
   players,
 }) => {
   return (

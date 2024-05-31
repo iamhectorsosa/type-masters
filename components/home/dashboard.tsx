@@ -14,12 +14,6 @@ import { getProfile } from "@/modules/user/profile"
 
 import { Button } from "../ui/button"
 
-type OnlineUser = {
-  username: string
-  preferredHue: string
-  presence_ref?: string
-}
-
 const onlineUserSchema = z.array(
   z.object({
     username: z.string(),
@@ -27,6 +21,8 @@ const onlineUserSchema = z.array(
     presence_ref: z.string().optional(),
   })
 )
+
+export type OnlineUsers = z.infer<typeof onlineUserSchema>
 
 const LOBBY_ROOM = "lobby-room"
 
@@ -40,7 +36,7 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
     mutationFn: signOut,
   })
 
-  const [users, setUsers] = React.useState<OnlineUser[]>([])
+  const [users, setUsers] = React.useState<OnlineUsers>([])
 
   const supabase = createClient()
 
@@ -64,7 +60,7 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
 
         if (!profile.data || "error" in profile.data) return null
 
-        const user: OnlineUser = {
+        const user: OnlineUsers[number] = {
           username: profile.data.username,
           preferredHue: profile.data.preferred_hue,
         }
