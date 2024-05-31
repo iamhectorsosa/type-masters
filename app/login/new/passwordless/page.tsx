@@ -12,7 +12,7 @@ export default async function Page() {
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/settings")
+    redirect("/")
   }
 
   return <RegisterFormPasswordless />

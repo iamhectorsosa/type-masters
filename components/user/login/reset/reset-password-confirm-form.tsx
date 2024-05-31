@@ -47,7 +47,7 @@ export const ResetPasswordConfirmForm: React.FC = () => {
           email,
           password,
           redirect: {
-            url: "/settings/accounts",
+            url: "/",
           },
         })
       }}

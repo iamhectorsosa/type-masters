@@ -48,7 +48,7 @@ export const LoginForm: React.FC<{
       email,
       password,
       redirect: {
-        url: "/settings",
+        url: "/",
       },
     })
   }

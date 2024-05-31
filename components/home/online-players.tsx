@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { AvatarPlaceholder } from "../avatar-placeholder"
+import { AvatarPlaceholder } from "@/components/home/avatar-placeholder"
 
 type OnlineUser = {
   username: string

@@ -2,14 +2,17 @@
 
 import React, { FC } from "react"
 import { CircleIcon } from "@radix-ui/react-icons"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import * as z from "zod"
 
+import { OnlinePlayers } from "@/components/home/online-players"
+import { Stats } from "@/components/home/stats"
+
 import { createClient } from "@/modules/utils/client"
+import { signOut } from "@/modules/user/auth"
 import { getProfile } from "@/modules/user/profile"
 
-import { OnlinePlayers } from "./OnlinePlayers"
-import { Stats } from "./Stats"
+import { Button } from "../ui/button"
 
 type OnlineUser = {
   username: string
@@ -31,6 +34,10 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
   const profile = useQuery({
     queryKey: ["profiles", userId],
     queryFn: () => getProfile({ id: userId }),
+  })
+
+  const logout = useMutation({
+    mutationFn: signOut,
   })
 
   const [users, setUsers] = React.useState<OnlineUser[]>([])
@@ -91,6 +98,24 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           acurracyPercentage={2}
         />
         <OnlinePlayers players={users} />
+        <div className="flex w-full justify-center">
+          <Button
+            onClick={() =>
+              logout.mutate({
+                redirect: {
+                  url: "/login",
+                },
+              })
+            }
+            variant="link"
+            size={"sm"}
+          >
+            {logout.isPending && (
+              <CircleIcon className="mr-2 size-4 animate-spin" />
+            )}
+            Sign out
+          </Button>
+        </div>
       </div>
     </div>
   )

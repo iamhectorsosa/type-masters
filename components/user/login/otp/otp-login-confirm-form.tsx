@@ -47,7 +47,7 @@ export const OtpLoginConfirmForm: React.FC<{ email: string }> = ({ email }) => {
           email,
           token,
           redirect: {
-            url: "/settings/accounts",
+            url: "/",
           },
         })
       }

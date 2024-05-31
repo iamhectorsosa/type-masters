@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-import { Dashboard } from "@/components/home/Dashboard"
+import { Dashboard } from "@/components/home/dashboard"
 
 import { createClient } from "@/modules/utils/server"
 
@@ -11,9 +11,9 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (user) {
-    return <Dashboard userId={user.id} />
+  if (!user) {
+    redirect("/login")
   }
 
-  redirect("/login")
+  return <Dashboard userId={user.id} />
 }
