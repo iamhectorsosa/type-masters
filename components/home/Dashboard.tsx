@@ -14,48 +14,47 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
     queryFn: () => getProfile({ id: userId }),
   })
 
-  React.useEffect(() => {
-    const supabase = createClient()
-    const roomOne = supabase.channel("room_01")
+  const [state, setState] = React.useState("Hello")
 
-    roomOne
+  const supabase = createClient()
+
+  React.useEffect(() => {
+    const room = supabase.channel("test-room")
+
+    room
+      .on("presence", { event: "join" }, ({ newPresences }) => {
+        setState(JSON.stringify(newPresences))
+      })
+      .on("presence", { event: "leave" }, ({ leftPresences }) => {
+        setState(JSON.stringify(leftPresences))
+      })
       .on("presence", { event: "sync" }, () => {
-        const newState = roomOne.presenceState()
-        console.log("sync", newState)
+        const newState = room.presenceState()
+        setState(JSON.stringify(newState))
       })
-      .on("presence", { event: "join" }, ({ key, newPresences }) => {
-        console.log("join", key, newPresences)
+      .subscribe(async (status) => {
+        if (status !== "SUBSCRIBED") {
+          return
+        }
+
+        await room.track({
+          name: "Hector",
+          result: 0,
+          ready: true,
+        })
       })
-      .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-        console.log("leave", key, leftPresences)
-      })
-      .subscribe()
-  }, [])
 
-  React.useEffect(() => {
-    const supabase = createClient()
-    const roomOne = supabase.channel("room_01")
-
-    roomOne.subscribe(async (status) => {
-      if (status !== "SUBSCRIBED") {
-        return
-      }
-
-      const userStatus = {
-        user: "user-2",
-        online_at: new Date().toISOString(),
-      }
-
-      const presenceTrackStatus = await roomOne.track(userStatus)
-      console.log(presenceTrackStatus)
-    })
-  }, [])
+    return () => {
+      void supabase.removeChannel(room)
+    }
+  }, [supabase])
 
   if (!profile.data || "error" in profile.data) return null
 
   return (
     <div>
       <h1>Hello {profile.data.username}!</h1>
+      <p>{state}</p>
       <DashboardCard />
     </div>
   )
