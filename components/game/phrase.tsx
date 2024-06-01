@@ -10,7 +10,6 @@ import {
 } from "react"
 import {
   buildRenderedPhrase,
-  BuiltPhrase,
   calculatePercentageCompleted,
   Char,
 } from "@/utils/game"
@@ -31,11 +30,12 @@ const getCharColorClassName = ({
 
 export const Phrase: FC<{
   phrase: string
-  onValueChange: (percentage: number, builtPhrase: BuiltPhrase) => void
-  onComplete: () => void
+  onValueChange: (percentage: number, strokes: [number, number]) => void
+  onComplete: (strokes: [number, number]) => void
 }> = ({ phrase, onValueChange, onComplete }) => {
   const [value, setValue] = useState("")
   const [inputFocused, setInputFocused] = useState<boolean>(false)
+  const [, setStrokes] = useState<[number, number]>([0, 0])
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -43,16 +43,26 @@ export const Phrase: FC<{
   }, [])
 
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const builtPhrase = buildRenderedPhrase(phrase, e.target.value)
+    const { builtPhrase, correct, wrong } = buildRenderedPhrase(
+      phrase,
+      e.target.value
+    )
     const percentage = calculatePercentageCompleted(builtPhrase)
-    if (percentage <= 100) {
-      setValue(e.target.value)
-      onValueChange(percentage, builtPhrase)
-    }
 
-    if (percentage === 100) {
-      onComplete()
-    }
+    setStrokes(([, prevWrong]) => {
+      const newStrokes: [number, number] = [correct, wrong + prevWrong]
+
+      if (percentage <= 100) {
+        setValue(e.target.value)
+        onValueChange(percentage, newStrokes)
+      }
+
+      if (percentage === 100) {
+        onComplete(newStrokes)
+      }
+
+      return [correct, wrong + prevWrong]
+    })
   }
 
   const handleValueInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -61,7 +71,7 @@ export const Phrase: FC<{
     }
   }
 
-  const renderedPhrase = buildRenderedPhrase(phrase, value)
+  const { builtPhrase } = buildRenderedPhrase(phrase, value)
 
   return (
     <div className="relative">
@@ -78,7 +88,7 @@ export const Phrase: FC<{
         htmlFor="phrase"
       >
         <div className="flex flex-wrap text-3xl">
-          {renderedPhrase.map((word, i) => (
+          {builtPhrase.map((word, i) => (
             <span key={`word-${i}`} className="mx-2">
               {word.map((char, j) => {
                 return (

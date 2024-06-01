@@ -1,5 +1,3 @@
-import diff, { Difference } from "microdiff"
-
 import englishWords from "./english.json"
 
 export const splitPhrase = (phrase: string) => {
@@ -19,7 +17,7 @@ export type Word = Char[]
 export type BuiltPhrase = Word[]
 
 export type Player = {
-  percentage: number
+  percentage?: number
   username: string
   hue: string
 }
@@ -27,7 +25,6 @@ export type Player = {
 export type PlayerResults = {
   player: Player
   time?: number | null
-  place?: number | null
   accuracy?: number | null
   wpm?: number | null
 }
@@ -35,14 +32,23 @@ export type PlayerResults = {
 export const buildRenderedPhrase = (
   phrase: string,
   value: string
-): BuiltPhrase => {
+): { builtPhrase: BuiltPhrase; correct: number; wrong: number } => {
   const phraseWords = splitPhrase(phrase)
   const valueWords = splitPhrase(value)
 
-  return phraseWords.map((word, i) => {
+  let correct = 0
+  let wrong = 0
+
+  const builtPhrase = phraseWords.map((word, i) => {
     const phraseTokens = word.map<Char>((char, j) => {
       const charExists = !!valueWords[i]?.[j] || !!valueWords[i + 1]
       const isCorrect = valueWords[i]?.[j] === char
+
+      if (charExists) {
+        if (isCorrect) correct += 1
+        else wrong += 1
+      }
+
       return {
         value: char,
         exists: charExists,
@@ -62,6 +68,8 @@ export const buildRenderedPhrase = (
 
     return phraseTokens.concat(additionalTokens ?? [])
   })
+
+  return { builtPhrase, correct, wrong }
 }
 
 export const currentCursorPosition = (
@@ -148,28 +156,13 @@ export const generateNewPhraseText = (length = 10): string => {
   return result
 }
 
-// Fucking unoptimized :)
-export const calculateAccuracy = (builtPhrases: BuiltPhrase[]): number => {
-  const diffs = builtPhrases.reduce<Difference[]>((acc, phrase, i) => {
-    const prevPhrase = builtPhrases[i - 1]
-    if (!prevPhrase) return acc
-    acc.push(...diff(prevPhrase, phrase))
-    return acc
-  }, [])
-
-  const [correct, wrong] = diffs.reduce<[number, number]>(
-    (acc, diff) => {
-      if (diff.type === "CHANGE" && diff.path[2] === "correct") {
-        return diff.value ? [acc[0] + 1, acc[1]] : [acc[0], acc[1] + 1]
-      }
-
-      if (diff.type === "CREATE" && diff.value.additionalIncorrect === true) {
-        return [acc[0], acc[1] + 1]
-      }
-      return acc
-    },
-    [0, 0]
-  )
-
+export const calculateAccuracy = (correct: number, wrong: number) => {
+  if (correct + wrong === 0) return 0
   return Math.round((correct / (correct + wrong)) * 100)
+}
+
+export const timeElapsed = (start: Date, finish: Date) => {
+  return Math.round(
+    Math.abs(finish.getTime() - new Date(start).getTime()) / 1000
+  )
 }
