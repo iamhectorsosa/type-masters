@@ -21,7 +21,6 @@ export default async function Page({
 
   return (
     <div className="space-y-6">
-      {params.matchId}
       <GameShell userId={user.id} matchId={params.matchId} />
     </div>
   )

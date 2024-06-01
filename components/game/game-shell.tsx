@@ -5,8 +5,11 @@ import {
   calculateAccuracy,
   calculateWPM,
   generateNewPhraseText,
+  PlayerResults,
+  timeElapsed,
 } from "@/utils/game"
-import { useMutation } from "@tanstack/react-query"
+import { CrossCircledIcon } from "@radix-ui/react-icons"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import confetti from "canvas-confetti"
 
 import { timeFormat } from "@/lib/time"
@@ -14,8 +17,9 @@ import { Phrase } from "@/components/game/phrase"
 import { Race } from "@/components/game/race"
 import { Results } from "@/components/game/results"
 
-import { finishMatch, startMatch } from "@/modules/matches/match"
+import { finishMatch, getMatch, startMatch } from "@/modules/matches/match"
 
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 import { useTimer } from "./hooks/useTimer"
 
 const MOCK_PLAYERS = [
@@ -35,11 +39,11 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
 
   const [accuracy, setAccuracy] = useState<number | null>(null)
 
-  const { mutate: start } = useMutation({
+  const { mutate: start, ...startMutation } = useMutation({
     mutationFn: startMatch,
   })
 
-  const { mutate: finish } = useMutation({
+  const { mutate: finish, ...finishMutation } = useMutation({
     mutationFn: finishMatch,
   })
 
@@ -75,8 +79,20 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
     setAccuracy(calculateAccuracy(correct, wrong))
   }
 
+  const error = finishMutation.data?.error
+
   return (
     <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <CrossCircledIcon className="size-4" />
+          <AlertTitle>Something went wrong!</AlertTitle>
+          <AlertDescription>
+            {error.message ?? "Unknown error"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <h1 className="text-3xl font-bold">{timeFormat(time)}</h1>
       <Race
         players={[
@@ -84,32 +100,14 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
           ...MOCK_PLAYERS,
         ]}
       />
-      {playerPercentage < 100 ? (
+      {!startMutation.data?.error && (
         <Phrase
           phrase={phrase}
           onValueChange={handlePhraseValueChange}
           onComplete={handleRaceComplete}
         />
-      ) : (
-        <Results
-          players={[
-            {
-              place: 1,
-              time,
-              accuracy,
-              wpm: calculateWPM(time, phrase),
-              player: {
-                username: "Player 1",
-                percentage: playerPercentage,
-                hue: "31",
-              },
-            },
-            ...MOCK_PLAYERS.map((player) => ({
-              player,
-            })),
-          ]}
-        />
       )}
+      <Results matchId={matchId} userId={userId} />
     </div>
   )
 }

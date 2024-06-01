@@ -12,6 +12,48 @@ type ServerError = {
 type UserMatch = Database["public"]["Tables"]["user_matches"]["Row"]
 type UserMatchId = Pick<UserMatch, "match_id" | "user_id">
 
+export async function getMatch(options: Partial<{ match_id: string }>) {
+  if (!options.match_id) {
+    return {
+      error: { message: "Attempt error - an error occurred with your update" },
+    }
+  }
+
+  const supabase = createClient()
+
+  const match = await supabase
+    .from("matches")
+    .select(`*, user_matches(*, profiles(*))`)
+    .eq("id", options.match_id)
+
+  if (match.error)
+    return { error: { message: match.error.message } } as ServerError
+
+  return match.data[0]
+}
+
+export async function getUserMatch(
+  options: Partial<UserMatchId>
+): Promise<ServerError | UserMatch> {
+  if (!options.match_id || !options.user_id) {
+    return {
+      error: { message: "Attempt error - an error occurred with your select" },
+    }
+  }
+
+  const supabase = createClient()
+
+  const match = await supabase
+    .from("user_matches")
+    .select(`*`)
+    .eq("match_id", options.match_id)
+    .eq("user_id", options.user_id)
+
+  if (match.error) return { error: { message: match.error.message } }
+
+  return match.data[0]
+}
+
 export async function finishMatch(
   options: Partial<{
     phrase: string
@@ -36,6 +78,14 @@ export async function finishMatch(
     .eq("user_id", options.user_id)
 
   if (match.error) return { error: { message: match.error.message } }
+
+  if (match.data[0].match_finished) {
+    return {
+      error: {
+        message: "Attempt error - match already finished",
+      },
+    }
+  }
 
   if (!match.data[0].match_started || !options.finish) {
     return {
@@ -80,6 +130,23 @@ export async function startMatch(
   }
 
   const supabase = createClient()
+
+  const match = await supabase
+    .from("user_matches")
+    .select(`*`)
+    .eq("match_id", options.match_id)
+    .eq("user_id", options.user_id)
+
+  if (match.error) return { error: { message: match.error.message } }
+
+  if (match.data[0].match_started) {
+    return {
+      error: {
+        message: "Attempt error - match already started",
+      },
+    }
+  }
+
   const { error } = await supabase
     .from("user_matches")
     .update({

@@ -17,7 +17,7 @@ export type Word = Char[]
 export type BuiltPhrase = Word[]
 
 export type Player = {
-  percentage: number
+  percentage?: number
   username: string
   hue: string
 }
@@ -25,7 +25,6 @@ export type Player = {
 export type PlayerResults = {
   player: Player
   time?: number | null
-  place?: number | null
   accuracy?: number | null
   wpm?: number | null
 }
@@ -163,5 +162,7 @@ export const calculateAccuracy = (correct: number, wrong: number) => {
 }
 
 export const timeElapsed = (start: Date, finish: Date) => {
-  return (finish.getTime() - new Date(start).getTime()) / 1000
+  return Math.round(
+    Math.abs(finish.getTime() - new Date(start).getTime()) / 1000
+  )
 }
