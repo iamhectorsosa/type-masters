@@ -1,7 +1,11 @@
 "use client"
 
 import { FC, useEffect, useState } from "react"
-import { calculateWPM, generateNewPhraseText } from "@/utils/game"
+import {
+  calculateAccuracy,
+  calculateWPM,
+  generateNewPhraseText,
+} from "@/utils/game"
 import { useMutation } from "@tanstack/react-query"
 import confetti from "canvas-confetti"
 
@@ -10,7 +14,7 @@ import { Phrase } from "@/components/game/phrase"
 import { Race } from "@/components/game/race"
 import { Results } from "@/components/game/results"
 
-import { updateMatch } from "@/modules/matches/match"
+import { finishMatch, startMatch } from "@/modules/matches/match"
 
 import { useTimer } from "./hooks/useTimer"
 
@@ -31,33 +35,44 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
 
   const [accuracy, setAccuracy] = useState<number | null>(null)
 
-  const updateUserMatch = useMutation({
-    mutationFn: updateMatch,
+  const { mutate: start } = useMutation({
+    mutationFn: startMatch,
+  })
+
+  const { mutate: finish } = useMutation({
+    mutationFn: finishMatch,
   })
 
   useEffect(() => {
     // Recieved start signal from supabase realtime
-    startTimer()
-  }, [startTimer])
+    const startTime = startTimer()
+    start({ match_id: matchId, user_id: userId, start: startTime })
+  }, [matchId, userId, startTimer, start])
 
-  const handleRaceComplete = async () => {
-    stopTimer()
+  const handleRaceComplete = async ([correct, wrong]: [number, number]) => {
+    const stopTime = stopTimer()
     await confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     })
 
-    updateUserMatch.mutate({
+    finish({
       match_id: matchId,
       user_id: userId,
-      wpm: calculateWPM(time, phrase),
+      phrase,
+      correct,
+      wrong,
+      finish: stopTime,
     })
   }
 
-  const handlePhraseValueChange = (percentage: number, accuracy: number) => {
+  const handlePhraseValueChange = (
+    percentage: number,
+    [correct, wrong]: [number, number]
+  ) => {
     setPlayerPercentage(percentage)
-    setAccuracy(accuracy)
+    setAccuracy(calculateAccuracy(correct, wrong))
   }
 
   return (

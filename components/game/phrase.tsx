@@ -10,7 +10,6 @@ import {
 } from "react"
 import {
   buildRenderedPhrase,
-  calculateAccuracy,
   calculatePercentageCompleted,
   Char,
 } from "@/utils/game"
@@ -31,12 +30,12 @@ const getCharColorClassName = ({
 
 export const Phrase: FC<{
   phrase: string
-  onValueChange: (percentage: number, accuracy: number) => void
-  onComplete: () => void
+  onValueChange: (percentage: number, strokes: [number, number]) => void
+  onComplete: (strokes: [number, number]) => void
 }> = ({ phrase, onValueChange, onComplete }) => {
   const [value, setValue] = useState("")
   const [inputFocused, setInputFocused] = useState<boolean>(false)
-  const [strokes, setStrokes] = useState<[number, number]>([0, 0])
+  const [, setStrokes] = useState<[number, number]>([0, 0])
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -55,11 +54,11 @@ export const Phrase: FC<{
 
       if (percentage <= 100) {
         setValue(e.target.value)
-        onValueChange(percentage, calculateAccuracy(...newStrokes))
+        onValueChange(percentage, newStrokes)
       }
 
       if (percentage === 100) {
-        onComplete()
+        onComplete(newStrokes)
       }
 
       return [correct, wrong + prevWrong]

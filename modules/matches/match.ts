@@ -1,5 +1,7 @@
 "use server"
 
+import { calculateAccuracy, calculateWPM, timeElapsed } from "@/utils/game"
+
 import { createClient } from "@/modules/utils/server"
 
 import { Database } from "../types"
@@ -7,15 +9,86 @@ import { Database } from "../types"
 type ServerError = {
   error: { message: string }
 }
-
 type UserMatch = Database["public"]["Tables"]["user_matches"]["Row"]
+type UserMatchId = Pick<UserMatch, "match_id" | "user_id">
 
-export async function getMatches() {
+export async function finishMatch(
+  options: Partial<{
+    phrase: string
+    correct: number
+    wrong: number
+    finish: Date
+  }> &
+    UserMatchId
+): Promise<ServerError | void> {
+  if (!options.match_id || !options.user_id) {
+    return {
+      error: { message: "Attempt error - an error occurred with your update" },
+    }
+  }
+
   const supabase = createClient()
-  const { data, error } = await supabase.from("matches").select(`profiles (*)`)
+
+  const match = await supabase
+    .from("user_matches")
+    .select(`*`)
+    .eq("match_id", options.match_id)
+    .eq("user_id", options.user_id)
+
+  if (match.error) return { error: { message: match.error.message } }
+
+  if (!match.data[0].match_started || !options.finish) {
+    return {
+      error: {
+        message:
+          "Attempt error - match not started or finish time not provided",
+      },
+    }
+  }
+
+  if (!options.phrase) {
+    return {
+      error: { message: "Attempt error - phrase must be defined" },
+    }
+  }
+
+  const time: number = timeElapsed(
+    new Date(match.data[0].match_started),
+    options.finish
+  )
+
+  const { error } = await supabase
+    .from("user_matches")
+    .update({
+      match_finished: new Date().toISOString(),
+      wpm: calculateWPM(time, options.phrase),
+      accuracy: calculateAccuracy(options.correct ?? 0, options.wrong ?? 0),
+    })
+    .eq("match_id", options.match_id)
+    .eq("user_id", options.user_id)
 
   if (error) return { error: { message: error.message } }
-  return data
+}
+
+export async function startMatch(
+  options: Partial<UserMatchId & { start: Date }>
+): Promise<ServerError | void> {
+  if (!options.match_id || !options.user_id) {
+    return {
+      error: { message: "Attempt error - an error occurred with your update" },
+    }
+  }
+
+  const supabase = createClient()
+  const { error } = await supabase
+    .from("user_matches")
+    .update({
+      match_started: options.start?.toISOString(),
+    })
+    .eq("match_id", options.match_id)
+    .eq("user_id", options.user_id)
+
+  if (error) return { error: { message: error.message } }
 }
 
 export async function updateMatch(

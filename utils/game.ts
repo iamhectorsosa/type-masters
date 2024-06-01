@@ -158,5 +158,10 @@ export const generateNewPhraseText = (length = 10): string => {
 }
 
 export const calculateAccuracy = (correct: number, wrong: number) => {
+  if (correct + wrong === 0) return 0
   return Math.round((correct / (correct + wrong)) * 100)
+}
+
+export const timeElapsed = (start: Date, finish: Date) => {
+  return (finish.getTime() - new Date(start).getTime()) / 1000
 }

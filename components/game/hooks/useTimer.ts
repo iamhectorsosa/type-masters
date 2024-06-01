@@ -9,10 +9,12 @@ export const useTimer = () => {
 
   const startTimer = useCallback(() => {
     setStarted(true)
+    return new Date()
   }, [])
 
   const stopTimer = useCallback(() => {
     setStarted(false)
+    return new Date()
   }, [])
 
   useEffect(() => {

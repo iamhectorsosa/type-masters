@@ -116,18 +116,21 @@ export type Database = {
           best_wpm: number
           created_at: string
           id: string
+          matches_count: number
           wins: number
         }
         Insert: {
           best_wpm?: number
           created_at?: string
           id?: string
+          matches_count?: number
           wins?: number
         }
         Update: {
           best_wpm?: number
           created_at?: string
           id?: string
+          matches_count?: number
           wins?: number
         }
         Relationships: [
@@ -142,20 +145,29 @@ export type Database = {
       }
       user_matches: {
         Row: {
+          accuracy: number
           created_at: string
+          match_finished: string | null
           match_id: string
+          match_started: string | null
           user_id: string
           wpm: number
         }
         Insert: {
+          accuracy?: number
           created_at?: string
+          match_finished?: string | null
           match_id: string
+          match_started?: string | null
           user_id: string
           wpm?: number
         }
         Update: {
+          accuracy?: number
           created_at?: string
+          match_finished?: string | null
           match_id?: string
+          match_started?: string | null
           user_id?: string
           wpm?: number
         }
