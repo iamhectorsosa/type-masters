@@ -1,7 +1,7 @@
 "use client"
 
 import { FC, useEffect, useState } from "react"
-import { BuiltPhrase, calculateWPM, generateNewPhraseText } from "@/utils/game"
+import { calculateWPM, generateNewPhraseText } from "@/utils/game"
 import { useMutation } from "@tanstack/react-query"
 import confetti from "canvas-confetti"
 
@@ -12,7 +12,6 @@ import { Results } from "@/components/game/results"
 
 import { updateMatch } from "@/modules/matches/match"
 
-import { useAccuracy } from "./hooks/useAccuracy"
 import { useTimer } from "./hooks/useTimer"
 
 const MOCK_PLAYERS = [
@@ -30,7 +29,6 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
   const [phrase] = useState(generateNewPhraseText(20))
   const { time, startTimer, stopTimer } = useTimer()
 
-  const accuracyHelpers = useAccuracy()
   const [accuracy, setAccuracy] = useState<number | null>(null)
 
   const updateUserMatch = useMutation({
@@ -49,7 +47,6 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
       spread: 70,
       origin: { y: 0.6 },
     })
-    setAccuracy(accuracyHelpers.retrieveAccuracy())
 
     updateUserMatch.mutate({
       match_id: matchId,
@@ -58,12 +55,9 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
     })
   }
 
-  const handlePhraseValueChange = (
-    percentage: number,
-    builtPhrase: BuiltPhrase
-  ) => {
+  const handlePhraseValueChange = (percentage: number, accuracy: number) => {
     setPlayerPercentage(percentage)
-    accuracyHelpers.addPhrase(builtPhrase)
+    setAccuracy(accuracy)
   }
 
   return (
