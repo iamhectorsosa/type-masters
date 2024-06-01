@@ -210,7 +210,9 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
             {users.length === respondedPlayers.length && (
               <div className="flex gap-x-2">
                 <Button asChild>
-                  <Link href="/game/123">Begin the match</Link>
+                  <Link href="/game/0501fb18-c578-40c1-9d78-a28cc6336e34">
+                    Begin the match
+                  </Link>
                 </Button>
               </div>
             )}
