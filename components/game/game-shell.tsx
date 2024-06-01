@@ -19,7 +19,12 @@ import { Race } from "@/components/game/race"
 import { Results } from "@/components/game/results"
 
 import { createClient } from "@/modules/utils/client"
-import { finishMatch, getMatch, startMatch } from "@/modules/matches/match"
+import {
+  finishMatch,
+  getMatch,
+  getUserMatch,
+  startMatch,
+} from "@/modules/matches/match"
 import { getProfile } from "@/modules/user/profile"
 
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
@@ -52,9 +57,19 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
     queryFn: () => getProfile({ id: userId }),
   })
 
+  const { data: matchData } = useQuery({
+    queryKey: ["match", matchId],
+    queryFn: () => getMatch({ match_id: matchId }),
+  })
+
+  const { data: userMatchData, isLoading: userMatchLoading } = useQuery({
+    queryKey: ["userMatch", matchId, userId],
+    queryFn: () => getUserMatch({ match_id: matchId, user_id: userId }),
+  })
+
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
   const [phrase] = useState(generateNewPhraseText(20))
-  const { time, startTimer, stopTimer } = useTimer()
+  const { time, started, startTimer, stopTimer } = useTimer()
 
   const [players, setPlayers] = useState<PlayerSchema>([])
 
@@ -173,7 +188,6 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
 
   return (
     <div className="space-y-6">
-      {JSON.stringify(players)}
       {error && (
         <Alert variant="destructive">
           <CrossCircledIcon className="size-4" />
@@ -185,7 +199,7 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
       )}
 
       <h1 className="text-3xl font-bold">{timeFormat(time)}</h1>
-      <Race players={players} />
+      {started && <Race players={players} />}
       {playerPercentage <= 100 && (
         <Phrase
           phrase={phrase}

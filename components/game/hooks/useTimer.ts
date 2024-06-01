@@ -33,6 +33,7 @@ export const useTimer = () => {
   }, [started])
 
   return {
+    started,
     time,
     startTimer,
     stopTimer,
