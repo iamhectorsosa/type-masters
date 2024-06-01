@@ -4,3 +4,4 @@ node_modules
 **/*.html
 supabase
 modules/types
+pnpm-lock.yaml

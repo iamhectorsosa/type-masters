@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { BuiltPhrase, calculateAccuracy } from "@/utils/game"
 import { useCallback, useState } from "react"
+import { BuiltPhrase, calculateAccuracy } from "@/utils/game"
 
 export const useAccuracy = () => {
   const [phraseHistory, setPhraseHistory] = useState<BuiltPhrase[]>([])
@@ -11,11 +11,11 @@ export const useAccuracy = () => {
   }, [])
 
   const retrieveAccuracy = useCallback(() => {
-    return calculateAccuracy(phraseHistory);
+    return calculateAccuracy(phraseHistory)
   }, [phraseHistory])
 
   return {
     addPhrase,
-    retrieveAccuracy
+    retrieveAccuracy,
   }
 }

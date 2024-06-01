@@ -112,12 +112,7 @@ export const Dashboard: FC<{ userId: string }> = ({ userId }) => {
           setSelectedPlayers={setSelectedPlayers}
         />
         <div className="flex gap-x-2">
-          <Button
-            disabled={selectedPlayers.length === 0}
-            onClick={() => console.log({ selectedPlayers })}
-          >
-            Send invite
-          </Button>
+          <Button disabled={selectedPlayers.length === 0}>Send invite</Button>
           <Button
             variant="secondary"
             disabled={selectedPlayers.length === 0}

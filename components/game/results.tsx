@@ -1,5 +1,4 @@
 import { FC } from "react"
-import { generateHSL } from "@/utils/colors"
 import { PlayerResults } from "@/utils/game"
 
 import { timeFormat } from "@/lib/time"

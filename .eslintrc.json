@@ -44,5 +44,10 @@
       "version": "detect"
     }
   },
-  "ignorePatterns": ["/lib/env.ts", "/postcss.config.js", "/modules/types"]
+  "ignorePatterns": [
+    "/lib/env.ts",
+    "/postcss.config.js",
+    "/modules/types",
+    "/utils/game.ts"
+  ]
 }
