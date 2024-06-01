@@ -3,11 +3,12 @@
 import { FC } from "react"
 import { Player } from "@/utils/game"
 
+import { PlayerSchema } from "./game-shell"
 import { PlayerMarker } from "./player-marker"
 
 const PLAYER_HEIGHT = 46
 
-export const Race: FC<{ players: Player[] }> = ({ players }) => {
+export const Race: FC<{ players: PlayerSchema }> = ({ players }) => {
   return (
     <div
       className="relative border-b-2 border-gray-700"

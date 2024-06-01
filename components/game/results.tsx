@@ -46,7 +46,7 @@ export const Results: FC<{ matchId: string; userId: string }> = ({
         )
 
   const sortedPlayers = players?.sort((a, b) =>
-    b.time && a.time ? b.time - a.time : -1
+    b.time && a.time ? b.time - a.time : 0
   )
 
   if (!userFinished) return null

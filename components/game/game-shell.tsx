@@ -11,13 +11,16 @@ import {
 import { CrossCircledIcon } from "@radix-ui/react-icons"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import confetti from "canvas-confetti"
+import { z } from "zod"
 
 import { timeFormat } from "@/lib/time"
 import { Phrase } from "@/components/game/phrase"
 import { Race } from "@/components/game/race"
 import { Results } from "@/components/game/results"
 
+import { createClient } from "@/modules/utils/client"
 import { finishMatch, getMatch, startMatch } from "@/modules/matches/match"
+import { getProfile } from "@/modules/user/profile"
 
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 import { useTimer } from "./hooks/useTimer"
@@ -29,15 +32,84 @@ const MOCK_PLAYERS = [
   { username: "Player 5", percentage: 90, hue: "21" },
 ]
 
+const playerSchema = z.object({
+  userId: z.string(),
+  percentage: z.number(),
+  username: z.string(),
+  hue: z.string(),
+})
+
+const playersSchema = z.array(playerSchema)
+
+export type PlayerSchema = z.infer<typeof playersSchema>
+
 export const GameShell: FC<{ matchId: string; userId: string }> = ({
   matchId,
   userId,
 }) => {
+  const { data: profileData } = useQuery({
+    queryKey: ["profiles", userId],
+    queryFn: () => getProfile({ id: userId }),
+  })
+
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
   const [phrase] = useState(generateNewPhraseText(20))
   const { time, startTimer, stopTimer } = useTimer()
 
-  const [accuracy, setAccuracy] = useState<number | null>(null)
+  const [players, setPlayers] = useState<PlayerSchema>([])
+
+  const [, setAccuracy] = useState<number | null>(null)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    const room = supabase.channel(matchId)
+
+    room
+      .on("presence", { event: "sync" }, () => {
+        const presenceState = room.presenceState()
+        const presences = Object.values(presenceState).flatMap((user) => user)
+        const users = playersSchema.safeParse(presences)
+
+        if (users.success) {
+          setPlayers(users.data)
+        }
+      })
+      .on("broadcast", { event: "percentage-update" }, (payload) => {
+        const newPlayerData = playerSchema.safeParse(payload.payload)
+        if (newPlayerData.success) {
+          setPlayers((prev) =>
+            prev.map((player) => {
+              if (player.userId === newPlayerData.data.userId) {
+                return newPlayerData.data
+              }
+
+              return player
+            })
+          )
+        }
+      })
+      .subscribe((status) => {
+        if (status !== "SUBSCRIBED") {
+          return
+        }
+
+        if (!profileData || "error" in profileData) return null
+
+        const user: PlayerSchema[number] = {
+          userId,
+          hue: profileData.preferred_hue,
+          username: profileData.username,
+          percentage: playerPercentage,
+        }
+        room.track(user).catch(() => {})
+      })
+
+    return () => {
+      void supabase.removeChannel(room)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId, profileData, supabase, userId])
 
   const { mutate: start, ...startMutation } = useMutation({
     mutationFn: startMatch,
@@ -71,18 +143,37 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
     })
   }
 
-  const handlePhraseValueChange = (
+  const handlePhraseValueChange = async (
     percentage: number,
     [correct, wrong]: [number, number]
   ) => {
     setPlayerPercentage(percentage)
     setAccuracy(calculateAccuracy(correct, wrong))
+
+    if (!profileData || "error" in profileData) return null
+
+    const channel = supabase.channel(matchId, {
+      config: { broadcast: { self: true } },
+    })
+    await channel.send({
+      type: "broadcast",
+      event: "percentage-update",
+      payload: {
+        percentage,
+        userId,
+        username: profileData.username,
+        hue: profileData.preferred_hue,
+      } as PlayerSchema[number],
+    })
+
+    await supabase.removeChannel(channel)
   }
 
   const error = finishMutation.data?.error
 
   return (
     <div className="space-y-6">
+      {JSON.stringify(players)}
       {error && (
         <Alert variant="destructive">
           <CrossCircledIcon className="size-4" />
@@ -94,13 +185,8 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
       )}
 
       <h1 className="text-3xl font-bold">{timeFormat(time)}</h1>
-      <Race
-        players={[
-          { username: "Player 1", percentage: playerPercentage, hue: "31" },
-          ...MOCK_PLAYERS,
-        ]}
-      />
-      {!startMutation.data?.error && (
+      <Race players={players} />
+      {playerPercentage <= 100 && (
         <Phrase
           phrase={phrase}
           onValueChange={handlePhraseValueChange}
