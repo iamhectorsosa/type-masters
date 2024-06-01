@@ -57,15 +57,15 @@ export const GameShell: FC<{ matchId: string; userId: string }> = ({
     queryFn: () => getProfile({ id: userId }),
   })
 
-  const { data: matchData } = useQuery({
-    queryKey: ["match", matchId],
-    queryFn: () => getMatch({ match_id: matchId }),
-  })
+  // const { data: matchData } = useQuery({
+  //   queryKey: ["match", matchId],
+  //   queryFn: () => getMatch({ match_id: matchId }),
+  // })
 
-  const { data: userMatchData, isLoading: userMatchLoading } = useQuery({
-    queryKey: ["userMatch", matchId, userId],
-    queryFn: () => getUserMatch({ match_id: matchId, user_id: userId }),
-  })
+  // const { data: userMatchData, isLoading: userMatchLoading } = useQuery({
+  //   queryKey: ["userMatch", matchId, userId],
+  //   queryFn: () => getUserMatch({ match_id: matchId, user_id: userId }),
+  // })
 
   const [playerPercentage, setPlayerPercentage] = useState<number>(0)
   const [phrase] = useState(generateNewPhraseText(20))
